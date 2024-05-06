@@ -1,0 +1,147 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Body */
+body {
+  font-family: Arial;
+  margin: 0;
+  background-color: #293462;
+}
+
+/* Header/Title */
+.header {
+  padding: 20px;
+  text-align: center;
+  background-color: #6173f4;
+  color: #293462;
+  font-weight: 900;
+  font-stretch: extra-expanded;
+}
+
+#logoPic {
+  width: 10%;
+  height: auto;
+  min-width: 100px;
+}
+
+h2 {
+  padding-bottom: 20px;
+}
+
+#inputDiv {
+  padding-bottom: 20px;
+}
+
+/* Column container */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.left {
+  flex: 40%;
+  background-color: #293462;
+  border: 3px solid #fcefed;
+  margin: 40px;
+  color: #fcefed;
+  padding: 20px;
+}
+
+input[type='file']::file-selector-button {
+  border-radius: 4px;
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  color: #fcefed;
+  background-color: #6173f4;
+  border: 2px solid #ff6123;
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 200ms;
+}
+
+/* file upload button hover state */
+input[type='file']::file-selector-button:hover {
+  background-color: #ff6123;
+  color: #edf5e1;
+}
+
+/* file upload button active state */
+input[type='file']::file-selector-button:active {
+  color: #3b2e40;
+}
+
+#uploadAllButton,
+.uploadOneButton {
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #edf5e1;
+  background-color: #ff6123;
+  border: 1px solid #edf5e1;
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 200ms;
+}
+
+#selectedFilesList {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  text-align: left;
+}
+
+#uploadedFilesH4 {
+  display: none;
+}
+
+.right {
+  color: #fcefed;
+  flex: 40%;
+  background-color: #293462;
+  border: 3px solid #fcefed;
+  margin: 40px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Zentrieren Sie den Inhalt horizontal */
+  text-align: center;
+}
+
+#dropArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  color: #edf5e1;
+  border: 2px solid #ff6123;
+  background-color: #6173f4;
+  cursor: pointer;
+  margin: 40px;
+}
+
+img {
+  width: 50%; /* Du kannst die Breite nach Bedarf anpassen */
+  height: auto; /* Das Verhältnis beibehalten, um Verzerrungen zu vermeiden */
+  color: #05386b;
+}
+
+footer {
+  background-color: #3b2e40;
+  color: #ff6123;
+  text-align: center;
+}
+
+/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 700px) {
+  .row {
+    flex-direction: column;
+  }
+}

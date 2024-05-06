@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="img-src 'self' blob: *;"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>File Uploader</title>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <h1>Hello File Uploader</h1>
+        <img src="pngaaa.com-5593783.png" alt="" id="logoPic" />
+      </div>
+      <p>Upload different things.</p>
+    </div>
+
+    <!-- The flexible grid (content) -->
+
+    <!-- Left box -->
+    <div class="row">
+      <div class="left">
+        <h2>Browse files from your device</h2>
+        <!-- file input dialog öffnen -->
+        <div id="inputDiv">
+          <input type="file" id="inputElement" multiple />
+          <progress id="progressBar" max="100" value="0"></progress>
+          <button id="uploadAllButton">Upload All Files</button>
+        </div>
+        <ul id="unorderedList"></ul>
+        <div id="info"></div>
+
+        <div>
+          <h4 id="uploadedFilesH4">Your uploaded files:</h4>
+          <ul id="links"></ul>
+        </div>
+      </div>
+
+      <!-- Right box -->
+      <div class="right">
+        <h2>Drag&Drop your files here</h2>
+        <div>...and hope for the best.</div>
+        <div id="dropArea"><img src="pngaaa.com-4507575.png" /></div>
+      </div>
+    </div>
+    <footer>
+      <br /><br /><br />LINK LINK LINK LINK LINK LINK<br /><br /><br /><br /><br />
+    </footer>
+
+    <script>
+      const inputElement = document.getElementById('inputElement');
+      const progressBar = document.getElementById('progressBar');
+      const uploadAllButton = document.getElementById('uploadAllButton');
+      const unorderedList = document.getElementById('unorderedList');
+      const info = document.getElementById('info');
+      const links = document.getElementById('links');
+      const uploadedFilesH4 = document.getElementById('uploadedFilesH4');
+
+      let filesArray = [];
+
+      // Funktion für den Upload einer einzelnen Datei
+      const handleUploadOne = (clickedFile) => {
+        // eigenen Header erzeugen und mitschicken
+        // TODO: oder Dateinamen direkt in der URL des Requests übergeben oder als Query-Parameter
+        const headers = new Headers();
+        headers.append(
+          'Content-Disposition',
+          `attachment; filename="${clickedFile.name}"`
+        );
+
+        fetch('http://localhost:8005/upload', {
+          method: 'POST',
+          body: clickedFile,
+          headers: headers,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log('UploadOne hat geklappt:', data.filePaths);
+
+            // Entferne einen vorangestellten Punkt (.) aus data.filePaths
+            const filePathWithoutDot = data.filePaths.startsWith('.')
+              ? data.filePaths.substring(1)
+              : data.filePaths;
+
+            // Erzeuge ein <li>-Element mit einem Hyperlink zur hochgeladenen Datei
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+
+            // Verwende filePathWithoutDot anstelle von data.filePaths
+            link.href = `http://localhost:8005${filePathWithoutDot}`;
+            link.target = '_blank';
+            link.textContent = `http://localhost:8005${filePathWithoutDot}`;
+
+            // Füge das <a>-Element zum <li>-Element hinzu
+            li.appendChild(link);
+
+            // Füge das <li>-Element zur links-Liste hinzu
+            links.appendChild(li);
+
+            // Entferne das Listenelement aus unorderedList
+            const uploadOneButton = document.querySelector('.uploadOneButton');
+            const liToRemove = uploadOneButton.parentNode;
+            unorderedList.removeChild(liToRemove);
+
+            uploadedFilesH4.style.display = 'block';
+            console.log('fileList:', fileList);
+          })
+          .catch((error) => {
+            console.error('Error uploading files:', error);
+          });
+      };
+
+      const handleSelectedFiles = () => {
+        // Files auf der Festplatte auswählen mittels <input type="file">
+        // (this.files klappt in der Arrow-Function nicht)
+        const fileList = inputElement.files;
+        console.log('file:', fileList[0]);
+
+        // Liste der ausgewählten Files in UI anzeigen
+        for (let i = 0; i < fileList.length; i++) {
+          const file = fileList[i];
+
+          // Listenelement + Button erzeugen
+          const li = document.createElement('li');
+          const uploadOne = document.createElement('button');
+
+          // Textnode erzeugen
+          li.appendChild(document.createTextNode(file.name + ' '));
+          uploadOne.textContent = 'Upload';
+          uploadOne.setAttribute('class', 'uploadOneButton'); // Setze die class des Buttons
+          // Füge das File-Objekt als eigenes Attribut zum Button hinzu
+          uploadOne.file = file;
+
+          li.appendChild(uploadOne);
+          unorderedList.appendChild(li);
+
+          filesArray.push(fileList[i]);
+        }
+        console.log(filesArray);
+
+        // Event-Listener für jeden uploadOne-Button
+        const uploadOneButtons = document.querySelectorAll('.uploadOneButton');
+        uploadOneButtons.forEach((button) => {
+          button.addEventListener('click', (event) => {
+            // Greife auf das File-Objekt des geklickten Buttons zu
+            const clickedFile = event.currentTarget.file;
+            console.log('Das File-Objekt des geklickten Buttons:', clickedFile);
+
+            // Rufe handleUploadOne mit dem geklickten File-Objekt auf
+            handleUploadOne(clickedFile);
+          });
+        });
+      };
+
+      const handleUploadAll = () => {
+        console.log('im handleUploadAll() Scope:', filesArray);
+
+        if (filesArray.length > 0) {
+          // Zähler für die aktuelle hochzuladende Datei
+          let currentIndex = 0;
+
+          // Funktion für den Upload der nächsten Datei
+          const uploadNextFile = () => {
+            if (currentIndex < filesArray.length) {
+              const file = filesArray[currentIndex];
+
+              // eigenen Header erzeugen und mitschicken
+              const headers = new Headers();
+              headers.append(
+                'Content-Disposition',
+                `attachment; filename="${file.name}"`
+              );
+
+              fetch('http://localhost:8005/upload', {
+                method: 'POST',
+                body: file,
+                headers: headers,
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log('Upload completed:', data.filePaths);
+
+                  // Entferne einen vorangestellten Punkt (.) aus data.filePaths
+                  const filePathWithoutDot = data.filePaths.startsWith('.')
+                    ? data.filePaths.substring(1)
+                    : data.filePaths;
+
+                  // Erzeuge ein <li>-Element mit einem Hyperlink zur hochgeladenen Datei
+                  const li = document.createElement('li');
+                  const link = document.createElement('a');
+
+                  // Verwende filePathWithoutDot anstelle von data.filePaths
+                  link.href = `http://localhost:8005${filePathWithoutDot}`;
+                  link.target = '_blank';
+                  link.textContent = `http://localhost:8005${filePathWithoutDot}`;
+
+                  // Füge das <a>-Element zum <li>-Element hinzu
+                  li.appendChild(link);
+
+                  // Füge das <li>-Element zur links-Liste hinzu
+                  links.appendChild(li);
+
+                  // Erhöhe den Index für die nächste Datei
+                  currentIndex++;
+
+                  // Rufe die Funktion für den Upload der nächsten Datei auf
+                  uploadNextFile();
+
+                  // Wenn alle Dateien erfolgreich hochgeladen wurden, leere die unorderedList
+                  if (currentIndex === filesArray.length) {
+                    uploadedFilesH4.style.display = 'block';
+                    unorderedList.innerHTML = '';
+                    console.log('filesArray nach dem Upload:', filesArray);
+                  }
+                })
+                .catch((error) => {
+                  console.error('Error uploading files:', error);
+                });
+            }
+          };
+
+          // Starte den Upload-Prozess für die erste Datei
+          uploadNextFile();
+        } else {
+          info.innerHTML = 'Bitte mindestens eine Datei auswählen.';
+          console.warn('Bitte mindestens eine Datei auswählen.');
+        }
+      };
+
+      // Event Listener für den uploadAll-Button
+      uploadAllButton.addEventListener('click', handleUploadAll);
+
+      // Event Listener für handleSelectedFiles
+      inputElement.addEventListener('change', handleSelectedFiles);
+    </script>
+  </body>
+</html>
